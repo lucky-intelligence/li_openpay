@@ -6,6 +6,8 @@ import androidx.annotation.NonNull;
 
 import dev.undervolt.li_openpay.op.OpenpayWrapper;
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
+import io.flutter.embedding.engine.plugins.activity.ActivityAware;
+import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
@@ -17,7 +19,7 @@ import mx.openpay.android.exceptions.OpenpayServiceException;
 import mx.openpay.android.exceptions.ServiceUnavailableException;
 import mx.openpay.android.model.Token;
 
-public class LiOpenpayPlugin implements FlutterPlugin, MethodCallHandler {
+public class LiOpenpayPlugin implements FlutterPlugin, MethodCallHandler, ActivityAware {
   /// The MethodChannel that will the communication between Flutter and native Android
   ///
   /// This local reference serves to register the plugin with the Flutter Engine and unregister it
@@ -34,8 +36,8 @@ public class LiOpenpayPlugin implements FlutterPlugin, MethodCallHandler {
 
   public static void registerWith(Registrar registrar) {
     final MethodChannel channel = new MethodChannel(registrar.messenger(), "li_openpay");
-    channel.setMethodCallHandler(new LiOpenpayPlugin());
     LiOpenpayPlugin.currentActivity = registrar.activity();
+    channel.setMethodCallHandler(new LiOpenpayPlugin());
   }
 
   @Override
@@ -47,14 +49,15 @@ public class LiOpenpayPlugin implements FlutterPlugin, MethodCallHandler {
       }
       case "instance": {
         String merchantId = call.argument("merchantId");
-        String publicKey = call.argument("publicKey");
-        boolean sandbox = call.argument("sandbox");
-        this.openpay = new OpenpayWrapper(merchantId, publicKey, sandbox);
-        result.success("Set: Openpay instance");
+        String apiKey = call.argument("apiKey");
+        boolean production = call.argument("production");
+        this.openpay = new OpenpayWrapper(merchantId, apiKey, production);
+        result.success("");
+        System.out.println("INFO: Instanced Native Openpay Wrapper");
         break;
       }
       case "deviceSessionId": {
-        result.success(this.openpay.getDeviceSessionID(LiOpenpayPlugin.currentActivity));
+        result.success(this.openpay.getDeviceSessionID(this.currentActivity));
         break;
       }
       case "createCard": {
@@ -67,12 +70,12 @@ public class LiOpenpayPlugin implements FlutterPlugin, MethodCallHandler {
         this.openpay.createCard(name, card, month, year, cvv, new OperationCallBack<Token>() {
           @Override
           public void onError(OpenpayServiceException e) {
-            result.error(String.valueOf(e.getErrorCode()), e.getBody(), e);
+            result.error(String.valueOf(e.getErrorCode()), "OpenPay Error", e.getDescription());
           }
 
           @Override
           public void onCommunicationError(ServiceUnavailableException e) {
-            result.error("-1", "Service Unavailable", e);
+            result.error("-1", "OpenPay Error", "Service unavailable");
           }
 
           @Override
@@ -90,5 +93,25 @@ public class LiOpenpayPlugin implements FlutterPlugin, MethodCallHandler {
   @Override
   public void onDetachedFromEngine(@NonNull FlutterPluginBinding binding) {
     channel.setMethodCallHandler(null);
+  }
+
+  @Override
+  public void onAttachedToActivity(ActivityPluginBinding binding) {
+    LiOpenpayPlugin.currentActivity = binding.getActivity();
+  }
+
+  @Override
+  public void onDetachedFromActivityForConfigChanges() {
+
+  }
+
+  @Override
+  public void onReattachedToActivityForConfigChanges(ActivityPluginBinding binding) {
+    LiOpenpayPlugin.currentActivity = binding.getActivity();
+  }
+
+  @Override
+  public void onDetachedFromActivity() {
+
   }
 }

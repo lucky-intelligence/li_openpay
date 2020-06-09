@@ -6,6 +6,7 @@ import mx.openpay.android.Openpay;
 import mx.openpay.android.OperationCallBack;
 import mx.openpay.android.model.Card;
 import mx.openpay.android.model.Token;
+import mx.openpay.android.validation.CardValidator;
 
 
 public class OpenpayWrapper {

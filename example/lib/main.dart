@@ -1,7 +1,4 @@
 import 'package:flutter/material.dart';
-import 'dart:async';
-
-import 'package:flutter/services.dart';
 import 'package:li_openpay/li_openpay.dart';
 
 void main() {
@@ -13,27 +10,20 @@ class MyApp extends StatefulWidget {
   _MyAppState createState() => _MyAppState();
 }
 
-class _MyAppState extends State<MyApp> {
-  String _platformVersion = 'Unknown';
+class _MyAppState extends State<MyApp> { 
 
   @override
   void initState() {
     super.initState();
-    initPlatformState();
+    this.genToken();
   }
 
-  // Platform messages are asynchronous, so we initialize in an async method.
-  Future<void> initPlatformState() async {
-    String platformVersion;
-    // Platform messages may fail, so we use a try/catch PlatformException.
-    // If the widget was removed from the tree while the asynchronous platform
-    // message was in flight, we want to discard the reply rather than calling
-    // setState to update our non-existent appearance.
-    if (!mounted) return;
-
-    setState(() {
-      _platformVersion = platformVersion;
-    });
+  void genToken() async{
+    var openpay = new LiOpenpay(merchantId: "MerchantID", apiKey: "ApiKey", production: false);
+    openpay.createCard("holderName", "xxxxyyyyzzzzvvvv", 12, 12, "123").then((c) {
+      print("Token: ${c.token}");
+    }).catchError((err) => print(err));
+    print("OPENPAY: ${await openpay.getDeviceSessionId()}");
   }
 
   @override
@@ -41,10 +31,10 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
-          title: const Text('Plugin example app'),
+          title: const Text('Li_OpenPay'),
         ),
         body: Center(
-          child: Text('Running on: $_platformVersion\n'),
+          child: Text('See getToken method'),
         ),
       ),
     );

@@ -14,6 +14,7 @@ class Card {
     @required this.expirationMonth, 
     @required this.expirationYear, 
     @required this.cvv, 
-    @required this.token});
+    @required this.token
+  });
 
 }
