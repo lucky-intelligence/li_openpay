@@ -19,8 +19,8 @@ class _MyAppState extends State<MyApp> {
   }
 
   void genToken() async{
-    var openpay = new LiOpenpay(merchantId: "MerchantID", apiKey: "ApiKey", production: false);
-    openpay.createCard("holderName", "xxxxyyyyzzzzvvvv", 12, 12, "123").then((c) {
+    var openpay = new LiOpenpay(merchantId: "mde9saj6yaypoi2ppvlq", apiKey: "sk_c263ce152f264a50bd94b3a3c257c3bb", production: false);
+    openpay.createCard("Kevin Alexis Contreras Ramirez", "4111111111111111", 12, 24, "999").then((c) {
       print("Token: ${c.token}");
     }).catchError((err) => print(err));
     print("OPENPAY: ${await openpay.getDeviceSessionId()}");
